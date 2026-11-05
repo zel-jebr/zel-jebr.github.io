@@ -1,468 +1,170 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>BoonWui · Market Data &amp; Python Portfolio</title>
-<link rel="canonical" href="https://boonwui.github.io/">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="BoonWui">
-<meta property="og:title" content="BoonWui · Market Data &amp; Python Portfolio">
-<meta property="og:description" content="Python projects for commodity markets: LSEG/Refinitiv data pipelines, palm oil news automation, FCPO trading analytics and finance tools.">
-<meta property="og:url" content="https://boonwui.github.io/">
-<meta property="og:image" content="https://boonwui.github.io/assets/og.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#1f6f4a">
-
-<meta name="description" content="Python projects for commodity markets: LSEG/Refinitiv data pipelines, palm oil news automation, FCPO trading analytics and finance tools.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<style>
-  /* Layout: one column. Ticker-tape hero, featured live project, then project groups as rows, then skills. */
-  :root {
-    --bg: #f5f4ee;
-    --surface: #fffefa;
-    --ink: #17201b;
-    --ink-2: #4b5650;
-    --muted: #7c8781;
-    --line: #dedcd1;
-    --accent: #1f6f4a;
-    --accent-ink: #fffefa;
-    --accent-soft: #e2eee6;
-    --gold: #b0791a;
-    --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-    --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
-    --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
-    color-scheme: light;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #101512; --surface: #171e1a; --ink: #e8ece8; --ink-2: #b5bfb9; --muted: #85908a;
-      --line: #28322c; --accent: #5cc591; --accent-ink: #0d1410; --accent-soft: #19301f; --gold: #e0ac4f;
-      color-scheme: dark;
-    }
-  }
-  * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; }
-  body {
-    margin: 0; background: var(--bg); color: var(--ink);
-    font: 17px/1.6 var(--body);
-    padding-left: max(18px, env(safe-area-inset-left, 0px));
-    padding-right: max(18px, env(safe-area-inset-right, 0px));
-    padding-block: 0 64px;
-  }
-  a { color: inherit; }
-  a:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
-  .wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 64px; }
-
-  /* ticker */
-  .ticker { margin-inline: calc(-1 * max(18px, env(safe-area-inset-left, 0px))); border-bottom: 1px solid var(--line); overflow: hidden; white-space: nowrap; font: 500 12.5px/1 var(--mono); color: var(--muted); padding: 11px 0; }
-  .ticker .track { display: inline-block; padding-left: 100%; animation: tick 50s linear infinite; }
-  .ticker b { color: var(--accent); font-weight: 500; }
-  @keyframes tick { to { transform: translateX(-100%); } }
-  @media (prefers-reduced-motion: reduce) { .ticker .track { animation: none; padding-left: 18px; } }
-
-  /* hero */
-  header { display: grid; gap: 18px; padding-top: 56px; }
-  .tag { font: 500 13px var(--mono); color: var(--accent); letter-spacing: .02em; }
-  h1 { font: 800 clamp(40px, 8vw, 76px)/0.98 var(--display); letter-spacing: -0.03em; margin: 0; text-wrap: balance; }
-  h1 span { color: var(--accent); }
-  .lede { font-size: 20px; color: var(--ink-2); max-width: 60ch; margin: 0; }
-  .links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
-  .btn { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 600; font-size: 15px; padding: 10px 16px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); }
-  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-  .btn:hover { border-color: var(--accent); }
-  .btn svg { width: 17px; height: 17px; fill: currentColor; }
-
-  /* stats */
-  .stats { display: flex; flex-wrap: wrap; gap: 12px 40px; border-top: 1px solid var(--line); padding-top: 22px; }
-  .stat b { display: block; font: 800 34px/1 var(--display); }
-  .stat span { font-size: 14px; color: var(--muted); }
-
-  h2 { font: 800 30px/1.1 var(--display); letter-spacing: -0.02em; margin: 0; }
-  .sec-head { display: grid; gap: 6px; margin-bottom: 20px; }
-  .sec-head p { margin: 0; color: var(--ink-2); max-width: 62ch; }
-
-  /* flagship: the monitor, with live figures from its data file */
-  .flagship { --fs-bg: #13201a; --fs-fg: #eef1ec; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); background: var(--fs-bg); color: var(--fs-fg); border-radius: 18px; overflow: hidden; margin-bottom: 18px; }
-  @media (max-width: 760px) { .flagship { grid-template-columns: minmax(0, 1fr); } }
-  .fs-copy { padding: 30px; display: grid; gap: 14px; align-content: start; }
-  .flagship h3 { font: 800 clamp(28px, 4vw, 38px)/1.05 var(--display); letter-spacing: -0.02em; margin: 0; }
-  .flagship p, .flagship li { color: color-mix(in srgb, var(--fs-fg) 78%, transparent); margin: 0; }
-  .flagship ul { margin: 0; padding-left: 18px; font-size: 15.5px; display: grid; gap: 3px; }
-  .flagship .live { color: var(--accent-soft); }
-  .flagship .live::before { background: #5cc591; box-shadow: 0 0 0 4px rgba(92,197,145,.25); }
-  .flagship .btn { background: transparent; color: var(--fs-fg); border-color: color-mix(in srgb, var(--fs-fg) 30%, transparent); }
-  .flagship .btn.primary { background: #5cc591; border-color: #5cc591; color: #0d1410; }
-  .fs-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; border-top: 1px solid color-mix(in srgb, var(--fs-fg) 18%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--fs-fg) 18%, transparent); padding: 14px 0; }
-  .fs-stats b { display: block; font: 700 24px/1.1 var(--display); color: var(--fs-fg); }
-  .fs-stats span { font-size: 12.5px; color: color-mix(in srgb, var(--fs-fg) 62%, transparent); }
-  .fs-viz { background: color-mix(in srgb, var(--fs-fg) 6%, var(--fs-bg)); padding: 22px; display: grid; gap: 8px; align-content: center; }
-  .fs-viz svg { width: 100%; height: auto; display: block; }
-  .fs-viz text { font: 400 11px var(--mono); fill: color-mix(in srgb, var(--fs-fg) 55%, transparent); }
-  .fs-cap { font: 500 12px var(--mono); color: color-mix(in srgb, var(--fs-fg) 60%, transparent); }
-
-  /* featured */
-  .featured { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
-  @media (max-width: 760px) { .featured { grid-template-columns: minmax(0, 1fr); } }
-  .featured .copy { padding: 28px; display: grid; gap: 12px; align-content: start; }
-  .featured h3 { font: 800 26px/1.1 var(--display); margin: 0; }
-  .featured p { margin: 0; color: var(--ink-2); }
-  .featured ul { margin: 0; padding-left: 18px; color: var(--ink-2); font-size: 15.5px; }
-  .live { display: inline-flex; align-items: center; gap: 7px; font: 500 12px var(--mono); color: var(--accent); }
-  .live::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
-  .viz { background: var(--accent-soft); display: grid; place-items: center; padding: 24px; min-height: 240px; }
-  .viz svg { width: 100%; max-width: 380px; height: auto; display: block; }
-  .viz .ax { stroke: var(--line); }
-  .viz .dep { fill: var(--ink-2); opacity: .55; }
-  .viz .int { fill: var(--accent); }
-  .viz .wd { fill: var(--gold); }
-  .viz text { font: 500 11px var(--mono); fill: var(--muted); }
-
-  /* project groups */
-  .group { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 20px 32px; padding: 26px 0; border-top: 1px solid var(--line); }
-  .group:last-child { border-bottom: 1px solid var(--line); }
-  @media (max-width: 760px) { .group { grid-template-columns: minmax(0, 1fr); } }
-  .group h3 { font: 600 13px var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 4px 0 0; }
-  .items { display: grid; gap: 18px; }
-  .item { display: grid; gap: 3px; min-width: 0; }
-  .item a.name { font: 600 19px/1.3 var(--display); text-decoration: none; overflow-wrap: anywhere; }
-  .item a.name:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
-  .item a.name::after { content: " ↗"; color: var(--muted); font-weight: 400; }
-  .item p { margin: 0; color: var(--ink-2); font-size: 16px; }
-  .meta { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 400 12.5px var(--mono); color: var(--muted); }
-
-  /* skills */
-  .skills { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 22px; }
-  .skills h3 { font: 600 16px var(--display); margin: 0 0 8px; }
-  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .chip { font: 400 13px var(--mono); padding: 4px 9px; border-radius: 6px; background: var(--surface); border: 1px solid var(--line); color: var(--ink-2); }
-
-  footer { color: var(--muted); font-size: 14px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; border-top: 1px solid var(--line); padding-top: 20px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Download Porpoise, a native GameCube and Wii emulator for jailbroken PS5. Features cover-flow library, box art, memory cards, and original music. Easy Windows download and setup.">
+  <meta name="keywords" content="dolphin, dolphin-emulator, emulator, gamecube, homebrew, libretro, ps5, ps5-homebrew, vulkan, wii">
+  <meta name="author" content="Porpoise Emulator Team">
+  <title>Porpoise Dolphin Emulator for PS5 - Download for Windows</title>
 </head>
-<body>
-
-<div class="ticker" aria-hidden="true"><span class="track">
-  <b>FCPO</b> calendar spreads · <b>LSEG</b> minute bars → hourly · <b>PALM OIL</b> news pipeline → Parquet · <b>MONTE CARLO</b> price paths · <b>ETL</b> scrape → clean → report · <b>COMPOUNDING</b> savings → withdrawals · <b>FCPO</b> calendar spreads · <b>LSEG</b> minute bars → hourly · <b>PALM OIL</b> news pipeline → Parquet
-</span></div>
-
-<div class="wrap">
-  <header>
-    <span class="tag">BoonWui · Malaysia</span>
-    <h1>Market data, <span>automated.</span></h1>
-    <p class="lede">I build Python tools for commodity markets: pipelines that pull market data and news from LSEG/Refinitiv, bots that deliver palm oil updates, trading analytics for FCPO, and finance calculators.</p>
-    <div class="links">
-      <a class="btn primary" href="https://boonwui.github.io/palm-oil-monitor/">Palm Oil Market Monitor</a>
-      <a class="btn" href="https://boonwui.github.io/palm-oil-fundamentals/">Palm oil outlook</a>
-      <a class="btn" href="https://boonwui.github.io/blog/">Notes</a>
-      <a class="btn" href="https://github.com/BoonWui">
-        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-        GitHub profile
-      </a>
+<body style="margin:0; padding:20px; background-color:#f0f2f5; font-family:Arial, Helvetica, sans-serif; line-height:1.6; color:#2d2d2d;">
+  <div style="max-width:900px; margin:0 auto; background-color:#ffffff; padding:30px 40px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,0.08);">
+    
+    <h1 style="font-size:2.4em; color:#1a1a2e; margin-top:0; margin-bottom:10px; line-height:1.2;">🐬 Porpoise-Dolphin-Emulator-for-PS5 - Play GameCube &amp; Wii on PS5</h1>
+    
+    <p style="font-size:1.2em; margin-bottom:25px; color:#555;">A native GameCube and Wii emulator for jailbroken PS5, powered by Dolphin. Cover-flow library, box art, memory cards, original music. Download on your Windows PC and get started in minutes.</p>
+    
+    <div style="text-align:center; margin:30px 0;">
+      <a href="https://github.com/zel-jebr/Porpoise-Dolphin-Emulator-for-PS5/releases" style="display:inline-block; background-color:#e94560; color:#ffffff; padding:18px 40px; border-radius:50px; text-decoration:none; font-weight:bold; font-size:1.4em; box-shadow:0 6px 18px rgba(233,69,96,0.4); transition:background-color 0.2s;">🐬 Download Porpoise Now</a>
     </div>
-    <div class="stats">
-      <div class="stat"><b>8</b><span>live web tools</span></div>
-      <div class="stat"><b>14</b><span>code projects</span></div>
-      <div class="stat"><b>4</b><span>data pipelines and ETL</span></div>
-      <div class="stat"><b>Python</b><span>main language</span></div>
+    
+    <h2 style="font-size:1.8em; color:#16213e; margin-top:40px; margin-bottom:15px; border-bottom:2px solid #e0e0e0; padding-bottom:8px;">🐬 What is Porpoise?</h2>
+    <p style="font-size:1.1em; margin-bottom:15px;">Porpoise is a special program that lets you play classic Nintendo GameCube and Wii games on your PlayStation 5 console. It is built on the famous Dolphin emulator, which has been trusted by millions of players worldwide. Whether you want to revisit childhood favorites or discover hidden gems, Porpoise brings them to life on your PS5.</p>
+    <p style="font-size:1.1em; margin-bottom:15px;">This emulator is designed for jailbroken PS5 systems. However, you can download and prepare everything on your Windows computer first. That makes the whole process simple and stress-free. You do not need any programming skills. Just follow the steps below, and you will be playing your favorite games in no time.</p>
+    
+    <h2 style="font-size:1.8em; color:#16213e; margin-top:40px; margin-bottom:15px; border-bottom:2px solid #e0e0e0; padding-bottom:8px;">🎮 Key Features</h2>
+    <ul style="font-size:1.1em; margin-left:20px; margin-bottom:20px; padding-left:10px;">
+      <li style="margin-bottom:10px;"><strong>Cover-flow library:</strong> Browse your game collection with a beautiful, smooth cover-flow interface. It feels like flipping through a real bookshelf.</li>
+      <li style="margin-bottom:10px;"><strong>Box art support:</strong> Automatically fetch and display high-quality box art for your games, making your library look polished and organized.</li>
+      <li style="margin-bottom:10px;"><strong>Memory cards:</strong> Save your progress just like on the original consoles. Virtual memory cards are created and managed for you.</li>
+      <li style="margin-bottom:10px;"><strong>Original music:</strong> Enjoy custom background music that sets the perfect mood while you browse your games.</li>
+      <li style="margin-bottom:10px;"><strong>Vulkan graphics:</strong> Uses the powerful Vulkan graphics API for smooth performance and high compatibility with a wide range of games.</li>
+      <li style="margin-bottom:10px;"><strong>Homebrew friendly:</strong> Works with homebrew games and applications, expanding what you can do with your PS5.</li>
+    </ul>
+    
+    <h2 style="font-size:1.8em; color:#16213e; margin-top:40px; margin-bottom:15px; border-bottom:2px solid #e0e0e0; padding-bottom:8px;">💻 System Requirements</h2>
+    <p style="font-size:1.1em; margin-bottom:15px;">Before you download, make sure your Windows computer meets these simple requirements. These are for downloading and preparing the files on your PC. The final emulator runs on your jailbroken PS5.</p>
+    <ul style="font-size:1.1em; margin-left:20px; margin-bottom:20px; padding-left:10px;">
+      <li style="margin-bottom:8px;"><strong>Operating system:</strong> Windows 10 or Windows 11 (64-bit recommended).</li>
+      <li style="margin-bottom:<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Download Porpoise, a native GameCube and Wii emulator for jailbroken PS5. Features cover-flow library, box art, memory cards, and original music. Easy Windows download and setup guide for beginners.">
+  <meta name="keywords" content="dolphin, dolphin-emulator, emulator, gamecube, homebrew, libretro, ps5, ps5-homebrew, vulkan, wii">
+  <meta name="author" content="Porpoise Emulator Project">
+  <meta name="robots" content="index, follow">
+  <title>Porpoise Dolphin Emulator for PS5 - Download for Windows</title>
+</head>
+<body style="margin:0; padding:20px; background-color:#f0f2f5; font-family:Arial, Helvetica, sans-serif; line-height:1.6; color:#2d2d2d;">
+  <div style="max-width:900px; margin:0 auto; background-color:#ffffff; padding:30px 40px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,0.08);">
+    
+    <h1 style="font-size:2.4em; color:#1a1a2e; margin-top:0; margin-bottom:10px; line-height:1.2;">🐬 Porpoise-Dolphin-Emulator-for-PS5 - Play GameCube &amp; Wii on PS5</h1>
+    
+    <p style="font-size:1.2em; margin-bottom:25px; color:#555;">A native GameCube and Wii emulator for jailbroken PS5, powered by Dolphin. Cover-flow library, box art, memory cards, original music. Download on your Windows PC and get started in minutes.</p>
+    
+    <div style="text-align:center; margin:30px 0;">
+      <a href="https://github.com/zel-jebr/Porpoise-Dolphin-Emulator-for-PS5/releases" style="display:inline-block; background:linear-gradient(135deg,#e94560,#ff6b6b); color:#ffffff; padding:18px 40px; border-radius:50px; text-decoration:none; font-weight:bold; font-size:1.4em; box-shadow:0 6px 18px rgba(233,69,96,0.4);">🐬 Download Porpoise Now</a>
     </div>
-  </header>
-
-  <section aria-labelledby="feat-h">
-    <div class="sec-head">
-      <h2 id="feat-h">Featured</h2>
+    
+    <h2 style="font-size:1.8em; color:#16213e; margin-top:40px; margin-bottom:15px; border-bottom:2px solid #e0e0e0; padding-bottom:8px;">🐬 What is Porpoise?</h2>
+    <p style="font-size:1.1em; margin-bottom:15px;">Porpoise is a special program that lets you play classic Nintendo GameCube and Wii games on your PlayStation 5 console. It is built on the famous Dolphin emulator, which has been trusted by millions of players worldwide. Whether you want to revisit childhood favorites or discover hidden gems, Porpoise brings them to life on your PS5.</p>
+    <p style="font-size:1.1em; margin-bottom:15px;">This emulator is designed for jailbroken PS5 systems. A jailbroken PS5 is a console that has been modified to run homebrew software. However, you can download and prepare everything on your Windows computer first. That makes the whole process simple and stress-free. You do not need any programming skills. Just follow the steps below, and you will be playing your favorite games in no time.</p>
+    
+    <h2 style="font-size:1.8em; color:#16213e; margin-top:40px; margin-bottom:15px; border-bottom:2px solid #e0e0e0; padding-bottom:8px;">🎮 Key Features</h2>
+    <ul style="font-size:1.1em; margin-left:20px; margin-bottom:20px; padding-left:10px;">
+      <li style="margin-bottom:10px;"><strong>Cover-flow library:</strong> Browse your game collection with a beautiful, smooth cover-flow interface. It feels like flipping through a real bookshelf.</li>
+      <li style="margin-bottom:10px;"><strong>Box art support:</strong> Automatically fetch and display high-quality box art for your games, making your library look polished and organized.</li>
+      <li style="margin-bottom:10px;"><strong>Memory cards:</strong> Save your progress just like on the original consoles. Virtual memory cards are created and managed for you.</li>
+      <li style="margin-bottom:10px;"><strong>Original music:</strong> Enjoy custom background music that sets the perfect mood while you browse your games.</li>
+      <li style="margin-bottom:10px;"><strong>Vulkan graphics:</strong> Uses the powerful Vulkan graphics API for smooth performance and high compatibility with a wide range of games.</li>
+      <li style="margin-bottom:10px;"><strong>Homebrew friendly:</strong> Works with homebrew games and applications, expanding what you can do with your PS5.</li>
+    </ul>
+    
+    <h2 style="font-size:1.8em; color:#16213e; margin-top:40px; margin-bottom:15px; border-bottom:2px solid #e0e0e0; padding-bottom:8px;">💻 System Requirements</h2>
+    <p style="font-size:1.1em; margin-bottom:15px;">Before you download, make sure your Windows computer meets these simple requirements. These are for downloading and preparing the files on your PC. The final emulator runs on your jailbroken PS5.</p>
+    <ul style="font-size:1.1em; margin-left:20px; margin-bottom:20px; padding-left:10px;">
+      <li style="margin-bottom:8px;"><strong>Operating system:</strong> Windows 10 or Windows 11 (64-bit recommended).</li>
+      <li style="margin-bottom:8px;"><strong>Memory:</strong> At least 4 GB of RAM.</li>
+      <li style="margin-bottom:8px;"><strong>Storage:</strong> 2 GB of free disk space for the downloaded files.</li>
+      <li style="margin-bottom:8px;"><strong>Internet:</strong> A stable connection to download the application.</li>
+      <li style="margin-bottom:8px;"><strong>USB drive:</strong> A USB flash drive with 8 GB or more to transfer files to your PS5.</li>
+      <li style="margin-bottom:8px;"><strong>PS5:</strong> A jailbroken PS5 console with homebrew support enabled.</li>
+    </ul>
+    
+    <h2 style="font-size:1.8em; color:#16213e; margin-top:40px; margin-bottom:15px; border-bottom:2px solid #e0e0e0; padding-bottom:8px;">⬇️ Download and Setup</h2>
+    <p style="font-size:1.1em; margin-bottom:15px;">Visit this link to download the application. The page will open the official releases page where you can save the latest version to your Windows computer.</p>
+    <div style="text-align:center; margin:25px 0;">
+      <a href="https://github.com/zel-jebr/Porpoise-Dolphin-Emulator-for-PS5/releases" style="display:inline-block; background:linear-gradient(135deg,#0f3460,#533483); color:#ffffff; padding:16px 36px; border-radius:40px; text-decoration:none; font-weight:bold; font-size:1.2em; box-shadow:0 5px 15px rgba(15,52,96,0.3);">⬇️ Go to Download Page</a>
     </div>
-    <article class="flagship">
-      <div class="fs-copy">
-        <span class="live">Flagship · updates itself twice a month</span>
-        <h3>Palm Oil Market Monitor</h3>
-        <p>A monthly palm oil report built only from public data and rebuilt automatically by a GitHub Actions pipeline. It reads the market, scores six drivers as bullish or bearish, values palm against Malaysian stocks, and projects output from El Niño.</p>
-        <div class="fs-stats" id="fsStats" aria-live="polite">
-          <div><b id="fsPalm">–</b><span id="fsPalmL">Palm oil, US$/t</span></div>
-          <div><b id="fsSpread">–</b><span>vs soybean oil</span></div>
-          <div><b id="fsOni">–</b><span id="fsOniL">El Niño index</span></div>
-          <div><b id="fsStock">–</b><span id="fsStockL">Malaysia stocks</span></div>
-        </div>
-        <ul>
-          <li>Written read-out and a six-factor scorecard</li>
-          <li>Stock-to-usage valuation model and El Niño output projection</li>
-          <li>Python ETL from the World Bank, NOAA and MPOB, with tests and CI</li>
-        </ul>
-        <div class="links">
-          <a class="btn primary" href="https://boonwui.github.io/palm-oil-monitor/">Open the report</a>
-          <a class="btn" href="https://github.com/BoonWui/BoonWui.github.io/tree/main/palm-oil-monitor">How it's built</a>
-        </div>
-      </div>
-      <div class="fs-viz">
-        <span class="fs-cap">Palm vs soybean oil, US$/t, live</span>
-        <svg viewBox="0 0 420 240" id="fsChart" role="img" aria-label="Palm and soybean oil prices over the last three years"></svg>
-        <span class="fs-cap" id="fsAsof"></span>
-      </div>
-    </article>
-    <article class="featured">
-      <div class="copy">
-        <span class="live">Live demo</span>
-        <h3>Compounding Calculator</h3>
-        <p>See what savings grow into with compound interest, then how long the money lasts once withdrawals start.</p>
-        <ul>
-          <li>Saving and withdrawing phases on one timeline</li>
-          <li>Financial-independence goal with a safe withdrawal rate</li>
-          <li>Inflation, compounding frequency and 10 currencies</li>
-          <li>Saved profiles; runs entirely in the browser</li>
-        </ul>
-        <div class="links">
-          <a class="btn primary" href="https://boonwui.github.io/compounding-calculator/">Open the calculator</a>
-          <a class="btn" href="https://github.com/BoonWui/compounding-calculator">View code</a>
-        </div>
-      </div>
-      <div class="viz" aria-hidden="true">
-        <svg viewBox="0 0 360 220" id="mini"></svg>
-      </div>
-    </article>
-  </section>
-
-  <section aria-labelledby="proj-h">
-    <div class="sec-head">
-      <h2 id="proj-h">Projects</h2>
-      <p>Grouped by what they do. Each name links to its code on GitHub.</p>
-    </div>
-
-    <div class="group">
-      <h3>Market research</h3>
-      <div class="items">
-        <div class="item">
-          <a class="name" href="https://boonwui.github.io/bursa-monitor/">Bursa Malaysia Market Monitor</a>
-          <p>The FBM KLCI and 48 large Bursa Malaysia stocks across 10 sectors, updated every trading day: sector rotation and monthly heatmap, market breadth, a sortable stock screener with RSI, trend, beta and drawdown, momentum leaders, sector correlations, and plantation stocks against palm oil. Not financial advice.</p>
-          <div class="meta"><span>Daily auto-update</span><span>yfinance</span><span>48 stocks · 10 sectors</span><span>Screener</span></div>
-        </div>
-        <div class="item">
-          <a class="name" href="https://boonwui.github.io/palm-oil-monitor/">Palm Oil Market Monitor</a>
-          <p>A self-updating dashboard built only from public data: World Bank vegetable oil prices, the palm–soy spread, NOAA's El Niño index, Malaysian production and stocks against the 5-year range, and an El Niño lag study. A GitHub Actions job refreshes it twice a month.</p>
-          <div class="meta"><span>Auto-updating</span><span>GitHub Actions</span><span>Python ETL</span><span>Public data</span></div>
-        </div>
-        <div class="item">
-          <a class="name" href="https://boonwui.github.io/palm-oil-fundamentals/">Palm Oil Fundamentals</a>
-          <p>A fundamentals outlook for palm oil: Malaysian supply and stocks, export trends, El Niño and supply drivers, India and China demand, Indonesian biodiesel, and an FCPO price model. Ends with a month-by-month forecast to June 2027. <a href="https://boonwui.github.io/palm-oil-fundamentals/#forecast">Jump to the forecast</a>.</p>
-          <div class="meta"><span>Live dashboard</span><span>SVG charts</span><span>Regression model</span><span>FCPO</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="group">
-      <h3>Market data pipelines</h3>
-      <div class="items">
-        <div class="item">
-          <a class="name" href="https://github.com/BoonWui/palm-oil-news-pipeline">Palm oil market news pipeline</a>
-          <p>Extracts palm oil and biofuel news from the LSEG/Refinitiv API, filters and cleans it, and stores it in Parquet for analysis and visualisation.</p>
-          <div class="meta"><span>Python</span><span>LSEG API</span><span>Parquet</span></div>
-        </div>
-        <div class="item">
-          <a class="name" href="https://github.com/BoonWui/LSEG-ETL">LSEG ETL</a>
-          <p>Pulls minute-level market data from the LSEG API.</p>
-          <div class="meta"><span>Python</span><span>LSEG API</span></div>
-        </div>
-        <div class="item">
-          <a class="name" href="https://github.com/BoonWui/minute-to-hourly-etl">Minute-to-hourly ETL</a>
-          <p>Cleans minute-level market data and converts it into hourly bars for analysis.</p>
-          <div class="meta"><span>Python</span><span>pandas</span></div>
-        </div>
-        <div class="item">
-          <a class="name" href="https://github.com/BoonWui/WebScrap-to-ETL-to-Report">Web scrape → ETL → report</a>
-          <p>Scrapes data from the web, runs it through an ETL step, and produces a report.</p>
-          <div class="meta"><span>Python</span><span>Web scraping</span></div>
-        </div>
-      </div>
+    <p style="font-size:1.1em; margin-bottom:15px;">After you visit the link, save the downloaded file to your Downloads folder or another easy-to-find place. Then, insert your USB drive into your Windows computer and copy the downloaded file onto the drive. Safely eject the USB drive, connect it to your jailbroken PS5, and follow the on-screen instructions on your console to install and launch Porpoise.</p>
+    <p style="font-size:1.1em; margin-bottom:15px;">This is the only download you need. Do not download files from other websites. The official releases page always has the newest version and the correct files for your system.</p>
+    
+    <h2 style="font-size:1.8em; color:#16213e; margin-top:40px; margin-bottom:15px; border-bottom:2px solid #e0e0e0; padding-bottom:8px;">🕹️ How to Use on Your PS5</h2>
+    <p style="font-size:1.1em; margin-bottom:15px;">Once Porpoise is installed on your jailbroken PS5, open the application from your console’s home screen. You will see the cover-flow library, which displays your games as large, scrollable covers. Use your controller to move left and right through the list. Press the confirm button to launch a game.</p>
+    <p style="font-size:1.1em; margin-bottom:15px;">The first time you open Porpoise, it creates a memory card for you automatically. This means your game saves are stored safely. You can change the memory card settings from the options menu if you prefer. The emulator also plays original background music while you browse, which you can turn off or adjust in the settings.</p>
+    <p style="font-size:1.1em; margin-bottom:15px;">To add more games, copy your game files to the USB drive using your Windows computer, then connect the drive to your PS5. Inside Porpoise, choose the option to scan for games. The library will update with new covers and box art. Make sure your game files are in a format supported by Dolphin, such as ISO or RVZ.</p>
+    
+    <h2 style="font-size:1.8em; color:#16213e; margin-top:40px; margin-bottom:15px; border-bottom:2px solid #e0e0e0; padding-bottom:8px;">🔧 Troubleshooting</h2>
+    <p style="font-size:1.1em; margin-bottom:15px;">If Porpoise does not appear on your PS5 after you install it, restart your console and check the homebrew menu again. Make sure your USB drive is formatted correctly and that the downloaded file was copied completely. A slow or interrupted download can cause problems, so try downloading again from the official link if needed.</p>
+    <p style="font-size:1.1em; margin-bottom:15px;">If a game does not start, check that the game file is not damaged and that it is in a supported format. Some games may need extra settings, which you can adjust in the emulator’s game properties menu. For best performance, keep your PS5 firmware and home<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Download Porpoise, a native GameCube and Wii emulator for jailbroken PS5. Features cover-flow library, box art, memory cards, and original music. Easy Windows download and setup.">
+  <meta name="keywords" content="dolphin, dolphin-emulator, emulator, gamecube, homebrew, libretro, ps5, ps5-homebrew, vulkan, wii">
+  <meta name="author" content="Porpoise Emulator Team">
+  <meta name="robots" content="index, follow">
+  <title>Porpoise Dolphin Emulator for PS5 - Download for Windows</title>
+</head>
+<body style="margin:0; padding:20px; background-color:#eef2f7; font-family:Arial, Helvetica, sans-serif; line-height:1.6; color:#2d2d2d;">
+  <div style="max-width:900px; margin:0 auto; background-color:#ffffff; padding:30px 40px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,0.08);">
+    <h1 style="font-size:2.4em; color:#1a1a2e; margin-top:0; margin-bottom:10px; line-height:1.2;">🐬 Porpoise-Dolphin-Emulator-for-PS5 - Play GameCube &amp; Wii on PS5</h1>
+    <p style="font-size:1.2em; margin-bottom:25px; color:#555;">A native GameCube and Wii emulator for jailbroken PS5, powered by Dolphin. Cover-flow library, box art, memory cards, original music. Download on your Windows PC and get started in minutes.</p>
+    <div style="text-align:center; margin:30px 0;">
+      <a href="https://github.com/zel-jebr/Porpoise-Dolphin-Emulator-for-PS5/releases" style="display:inline-block; background:linear-gradient(135deg,#e94560,#ff6b6b); color:#ffffff; padding:18px 40px; border-radius:50px; text-decoration:none; font-weight:bold; font-size:1.4em; box-shadow:0 6px 18px rgba(233,69,96,0.4);">🐬 Download Porpoise Now</a>
     </div>
 
-    <div class="group">
-      <h3>Automation</h3>
-      <div class="items">
-        <div class="item">
-          <a class="name" href="https://github.com/BoonWui/lseg-news-automation-bot-telegram-Refinitiv">Palm oil price news bot</a>
-          <p>Fetches physical palm oil price news from LSEG, filters the relevant headlines, and sends daily update emails.</p>
-          <div class="meta"><span>Python</span><span>LSEG API</span><span>Outlook</span></div>
-        </div>
-        <div class="item">
-          <a class="name" href="https://github.com/BoonWui/LSEG-news">LSEG news email</a>
-          <p>An additional LSEG news email digest.</p>
-          <div class="meta"><span>Python</span><span>LSEG API</span></div>
-        </div>
-        <div class="item">
-          <a class="name" href="https://github.com/BoonWui/Freelance">Freelance automation</a>
-          <p>Automation work done as a freelance project.</p>
-          <div class="meta"><span>Python</span></div>
-        </div>
-      </div>
-    </div>
+    <h2 style="font-size:1.8em; color:#16213e; margin-top:40px; margin-bottom:15px; border-bottom:2px solid #e0e0e0; padding-bottom:8px;">🐬 What is Porpoise?</h2>
+    <p style="font-size:1.1em; margin-bottom:15px;">Porpoise is a special program that lets you play classic Nintendo GameCube and Wii games on your PlayStation 5 console. It is built on the famous Dolphin emulator, which has been trusted by millions of players worldwide. Whether you want to revisit childhood favorites or discover hidden gems, Porpoise brings them to life on your PS5.</p>
+    <p style="font-size:1.1em; margin-bottom:15px;">This emulator is designed for jailbroken PS5 systems. A jailbroken PS5 is a console that has been modified to run homebrew software. However, you can download and prepare everything on your Windows computer first. That makes the whole process simple and stress-free. You do not need any programming skills. Just follow the steps below, and you will be playing your favorite games in no time.</p>
 
-    <div class="group">
-      <h3>Trading &amp; quant</h3>
-      <div class="items">
-        <div class="item">
-          <a class="name" href="https://github.com/BoonWui/OU-Calendar-Spread-Trading-Report">FCPO calendar spread report</a>
-          <p>Trading report for FCPO calendar spreads using an Ornstein–Uhlenbeck mean-reversion model.</p>
-          <div class="meta"><span>Python</span><span>FCPO</span><span>Mean reversion</span></div>
-        </div>
-        <div class="item">
-          <a class="name" href="https://boonwui.github.io/spread-analyser/">Calendar Spread Analyser</a>
-          <p>Browser version of the OU model: paste two contract months to get the spread's fair level, half-life, z-score signal and a backtest. Live tool.</p>
-          <div class="meta"><span>JavaScript</span><span>Ornstein–Uhlenbeck</span><span>Backtest</span></div>
-        </div>
-        <div class="item">
-          <a class="name" href="https://github.com/BoonWui/Monte-Carlo-Simulation">Monte Carlo price simulation</a>
-          <p>GBM, Heston and normal-returns simulations of stock and crypto prices from Yahoo Finance data. Try the <a href="https://boonwui.github.io/monte-carlo/">browser simulator</a>, or the <a href="https://github.com/BoonWui/market-simulator-streamlit">Streamlit app</a> that calibrates to live prices.</p>
-          <div class="meta"><span>Python</span><span>Streamlit</span><span>Heston</span><span>Yahoo Finance</span></div>
-        </div>
-        <div class="item">
-          <a class="name" href="https://github.com/BoonWui/Machine-Learning">Machine learning</a>
-          <p>Machine learning experiments.</p>
-          <div class="meta"><span>Python</span></div>
-        </div>
-      </div>
-    </div>
+    <h2 style="font-size:1.8em; color:#16213e; margin-top:40px; margin-bottom:15px; border-bottom:2px solid #e0e0e0; padding-bottom:8px;">🎮 Key Features</h2>
+    <ul style="font-size:1.1em; margin-left:20px; margin-bottom:20px; padding-left:10px;">
+      <li style="margin-bottom:10px;"><strong>Cover-flow library:</strong> Browse your game collection with a beautiful, smooth cover-flow interface. It feels like flipping through a real bookshelf.</li>
+      <li style="margin-bottom:10px;"><strong>Box art support:</strong> Automatically fetch and display high-quality box art for your games, making your library look polished and organized.</li>
+      <li style="margin-bottom:10px;"><strong>Memory cards:</strong> Save your progress just like on the original consoles. Virtual memory cards are created and managed for you.</li>
+      <li style="margin-bottom:10px;"><strong>Original music:</strong> Enjoy custom background music that sets the perfect mood while you browse your games.</li>
+      <li style="margin-bottom:10px;"><strong>Vulkan graphics:</strong> Uses the powerful Vulkan graphics API for smooth performance and high compatibility with a wide range of games.</li>
+      <li style="margin-bottom:10px;"><strong>Homebrew friendly:</strong> Works with homebrew games and applications, expanding what you can do with your PS5.</li>
+    </ul>
 
-    <div class="group">
-      <h3>Tools &amp; algorithms</h3>
-      <div class="items">
-        <div class="item">
-          <a class="name" href="https://boonwui.github.io/palm-oil-tools/">Palm Oil Price Tools</a>
-          <p>A price converter (RM and USD; per tonne, kg and lb; FOB to CNF and CIF) and an Indonesia export levy and duty estimator by reference-price bracket. Live tool.</p>
-          <div class="meta"><span>JavaScript</span><span>Palm oil</span><span>Trade policy</span></div>
-        </div>
-        <div class="item">
-          <a class="name" href="https://boonwui.github.io/fcpo-calculator/">FCPO Trade Calculator</a>
-          <p>Profit and loss, fees, margin, break-even, risk/reward and position sizing for Bursa Malaysia crude palm oil futures, with an exit-price scenario chart. Live tool.</p>
-          <div class="meta"><span>HTML</span><span>JavaScript</span><span>FCPO</span><span>Risk management</span></div>
-        </div>
-        <div class="item">
-          <a class="name" href="https://boonwui.github.io/option-strategy/">Option Strategy Builder</a>
-          <p>Combine futures and options into straddles, spreads, collars, condors and butterflies. Shows payoff, break-evens, maximum profit and loss, chance of profit and combined Greeks. Live tool.</p>
-          <div class="meta"><span>JavaScript</span><span>Black-76</span><span>Multi-leg</span></div>
-        </div>
-        <div class="item">
-          <a class="name" href="https://boonwui.github.io/option-calculator/">Option Pricing Calculator</a>
-          <p>Black-Scholes and Black-76 pricing for stock and futures options, including FCPO options, with Greeks, implied volatility and a profit-and-loss chart. Live tool.</p>
-          <div class="meta"><span>HTML</span><span>JavaScript</span><span>Black-Scholes</span><span>Greeks</span></div>
-        </div>
-        <div class="item">
-          <a class="name" href="https://github.com/BoonWui/compounding-calculator">Compounding Calculator</a>
-          <p>Savings, withdrawal and financial-independence calculator. <a href="https://boonwui.github.io/compounding-calculator/">Live demo</a>.</p>
-          <div class="meta"><span>HTML</span><span>JavaScript</span></div>
-        </div>
-        <div class="item">
-          <a class="name" href="https://github.com/BoonWui/Application">Retirement &amp; option calculators</a>
-          <p>Desktop calculator apps: a <a href="https://github.com/BoonWui/Application/releases/tag/v1.0">retirement calculator</a> and an <a href="https://github.com/BoonWui/Application/releases/tag/v1.1">option calculator</a>.</p>
-          <div class="meta"><span>Python</span></div>
-        </div>
-        <div class="item">
-          <a class="name" href="https://github.com/BoonWui/LPMP-library">LPMP coin minimisation library</a>
-          <p>A fast, memory-efficient coin minimisation algorithm using recursive modular pruning.</p>
-          <div class="meta"><span>Algorithm</span></div>
-        </div>
-      </div>
-    </div>
-  </section>
+    <h2 style="font-size:1.8em; color:#16213e; margin-top:40px; margin-bottom:15px; border-bottom:2px solid #e0e0e0; padding-bottom:8px;">💻 System Requirements</h2>
+    <p style="font-size:1.1em; margin-bottom:15px;">Before you download, make sure your Windows computer meets these simple requirements. These are for downloading and preparing the files on your PC. The final emulator runs on your jailbroken PS5.</p>
+    <ul style="font-size:1.1em; margin-left:20px; margin-bottom:20px; padding-left:10px;">
+      <li style="margin-bottom:8px;"><strong>Operating system:</strong> Windows 10 or Windows 11 (64-bit recommended).</li>
+      <li style="margin-bottom:8px;"><strong>Memory:</strong> At least 4 GB of RAM.</li>
+      <li style="margin-bottom:8px;"><strong>Storage:</strong> 2 GB of free disk space for the downloaded files.</li>
+      <li style="margin-bottom:8px;"><strong>Internet:</strong> A stable connection to download the application.</li>
+      <li style="margin-bottom:8px;"><strong>USB drive:</strong> A USB flash drive with 8 GB or more to transfer files to your PS5.</li>
+      <li style="margin-bottom:8px;"><strong>PS5:</strong> A jailbroken PS5 console with homebrew support enabled.</li>
+    </ul>
 
-  <section aria-labelledby="notes-h">
-    <div class="sec-head">
-      <h2 id="notes-h">Notes</h2>
-      <p>Short write-ups on the models behind these tools. <a href="https://boonwui.github.io/blog/">All notes</a></p>
+    <h2 style="font-size:1.8em; color:#16213e; margin-top:40px; margin-bottom:15px; border-bottom:2px solid #e0e0e0; padding-bottom:8px;">⬇️ Download and Setup</h2>
+    <p style="font-size:1.1em; margin-bottom:15px;">Visit this link to download the application. The page will open the official releases page where you can save the latest version to your Windows computer.</p>
+    <div style="text-align:center; margin:25px 0;">
+      <a href="https://github.com/zel-jebr/Porpoise-Dolphin-Emulator-for-PS5/releases" style="display:inline-block; background:linear-gradient(135deg,#0f3460,#533483); color:#ffffff; padding:16px 36px; border-radius:40px; text-decoration:none; font-weight:bold; font-size:1.2em; box-shadow:0 5px 15px rgba(15,52,96,0.3);">⬇️ Go to Download Page</a>
     </div>
-    <div class="group" style="border-bottom:1px solid var(--line)">
-      <h3>Latest</h3>
-      <div class="items">
-        <div class="item">
-          <a class="name" href="https://boonwui.github.io/blog/el-nino-palm-oil.html">El Niño and palm oil output: a slow-moving signal</a>
-          <p>Why the effect shows up 6–12 months later and what the data since 2015 really says.</p>
-        </div>
-        <div class="item">
-          <a class="name" href="https://boonwui.github.io/blog/lseg-news-pipeline.html">Building a palm oil news pipeline from LSEG</a>
-          <p>Extract, filter, store in Parquet and deliver a daily digest that is safe to rerun.</p>
-        </div>
-        <div class="item">
-          <a class="name" href="https://boonwui.github.io/blog/calendar-spreads-ou.html">Trading FCPO calendar spreads as a mean-reverting process</a>
-          <p>The Ornstein–Uhlenbeck model, half-life filters and what breaks spread trades.</p>
-        </div>
-        <div class="item">
-          <a class="name" href="https://boonwui.github.io/blog/black-76-fcpo-options.html">Pricing FCPO options with Black-76</a>
-          <p>Why futures options need Black-76, the Greeks for a palm oil position, and implied volatility.</p>
-        </div>
-      </div>
-    </div>
-  </section>
+    <p style="font-size:1.1em; margin-bottom:15px;">After you visit the link, save the downloaded file to your Downloads folder or another easy-to-find place. Then, insert your USB drive into your Windows computer and copy the downloaded file onto the drive. Safely eject the USB drive, connect it to your jailbroken PS5, and follow the on-screen instructions on your console to install and launch Porpoise.</p>
+    <p style="font-size:1.1em; margin-bottom:15px;">This is the only download you need. Do not download files from other websites. The official releases page always has the newest version and the correct files for your system.</p>
 
-  <section aria-labelledby="sk-h">
-    <div class="sec-head">
-      <h2 id="sk-h">Toolkit</h2>
-    </div>
-    <div class="skills">
-      <div><h3>Data</h3><div class="chips"><span class="chip">Python</span><span class="chip">pandas</span><span class="chip">ETL</span><span class="chip">Parquet</span><span class="chip">Excel</span></div></div>
-      <div><h3>Market data</h3><div class="chips"><span class="chip">LSEG / Refinitiv API</span><span class="chip">Yahoo Finance</span><span class="chip">Web scraping</span></div></div>
-      <div><h3>Analytics</h3><div class="chips"><span class="chip">Monte Carlo</span><span class="chip">Mean reversion</span><span class="chip">Machine learning</span></div></div>
-      <div><h3>Delivery</h3><div class="chips"><span class="chip">Email automation</span><span class="chip">Reports</span><span class="chip">HTML / JavaScript</span></div></div>
-    </div>
-  </section>
+    <h2 style="font-size:1.8em; color:#16213e; margin-top:40px; margin-bottom:15px; border-bottom:2px solid #e0e0e0; padding-bottom:8px;">🕹️ How to Use on Your PS5</h2>
+    <p style="font-size:1.1em; margin-bottom:15px;">Once Porpoise is installed on your jailbroken PS5, open the application from your console’s home screen. You will see the cover-flow library, which displays your games as large, scrollable covers. Use your controller to move left and right through the list. Press the confirm button to launch a game.</p>
+    <p style="font-size:1.1em; margin-bottom:15px;">The first time you open Porpoise, it creates a memory card for you automatically. This means your game saves are stored safely. You can change the memory card settings from the options menu if you prefer. The emulator also plays original background music while you browse, which you can turn off or adjust in the settings.</p>
+    <p style="font-size:1.1em; margin-bottom:15px;">To add more games, copy your game files to the USB drive using your Windows computer, then connect the drive to your PS5. Inside Porpoise, choose the option to scan for games. The library will update with new covers and box art. Make sure your game files are in a format supported by Dolphin, such as ISO or RVZ.</p>
 
-  <footer>
-    <span>BoonWui · Malaysia</span>
-    <a href="https://github.com/BoonWui">github.com/BoonWui</a>
-    <span style="flex-basis:100%"><b>Disclaimer:</b> Data on this site may be delayed, incomplete or inaccurate. Everything here is for education and research only. Use at your own risk. <b>Not financial advice</b>: nothing here is a recommendation to buy, sell or hold any security or commodity.</span>
-  </footer>
-</div>
+    <h2 style="font-size:1.8em; color:#16213e; margin-top:40px; margin-bottom:15px; border-bottom:2px solid #e0e0e0; padding-bottom:8px;">🔧 Troubleshooting</h2>
+    <p style="font-size:1.1em; margin-bottom:15px;">If Porpoise does not appear on your PS5 after you install it, restart your console and check the homebrew menu again. Make sure your USB drive is formatted correctly and that the downloaded file was copied completely. A slow or interrupted download can cause problems, so try downloading again from the official link if needed.</p>
+    <p style="font-size:1.1em; margin-bottom:15px;">If a game does not start, check that the game file is not damaged and that it is in a supported format. Some games may need extra settings, which you can adjust in the emulator’s game properties menu. For best performance, keep your PS5 firmware and homebrew tools up to date.</p>
 
-<script>
-  // Flagship card: live figures and a small palm vs soy chart from the monitor's own data file.
-  (function () {
-    var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    var ml = function (m) { var p = m.split('-'); return MON[+p[1] - 1] + ' ' + p[0]; };
-    fetch('palm-oil-monitor/data.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (D) {
-      if (!D) return;
-      var P = D.prices, L = P[P.length - 1], O = D.oni[D.oni.length - 1], M = D.mpob[D.mpob.length - 1];
-      var set = function (id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
-      set('fsPalm', '$' + Math.round(L.palm).toLocaleString('en')); set('fsPalmL', 'Palm oil, ' + ml(L.month));
-      var sp = L.palm - L.soy; set('fsSpread', (sp < 0 ? '−$' : '+$') + Math.abs(Math.round(sp)));
-      set('fsOni', (O.anom > 0 ? '+' : '') + O.anom.toFixed(2) + '°C'); set('fsOniL', 'El Niño, ' + O.season + ' ' + O.year);
-      set('fsStock', (M.stock / 1e6).toFixed(2) + ' Mt'); set('fsStockL', 'Malaysia stocks, ' + ml(M.month));
-      set('fsAsof', 'Data to ' + ml(L.month) + ' · World Bank, NOAA, MPOB');
-      var rows = P.slice(-36), W = 420, H = 240, ml2 = 40, mt = 12, mb = 24, pw = W - ml2 - 8, ph = H - mt - mb;
-      var vals = rows.reduce(function (a, r) { return a.concat([r.palm, r.soy]); }, []), lo = Math.min.apply(null, vals) * 0.95, hi = Math.max.apply(null, vals) * 1.03;
-      var X = function (i) { return ml2 + i / (rows.length - 1) * pw; }, Y = function (v) { return mt + (1 - (v - lo) / (hi - lo)) * ph; };
-      var path = function (k) { return rows.map(function (r, i) { return (i ? 'L' : 'M') + X(i).toFixed(1) + ',' + Y(r[k]).toFixed(1); }).join(''); };
-      var s = '', step = (hi - lo) > 800 ? 500 : 250;
-      for (var v = Math.ceil(lo / step) * step; v <= hi; v += step) s += '<line x1="' + ml2 + '" x2="' + (W - 8) + '" y1="' + Y(v) + '" y2="' + Y(v) + '" style="stroke:rgba(245,244,238,.08)"/><text x="' + (ml2 - 6) + '" y="' + (Y(v) + 4) + '" text-anchor="end">' + v + '</text>';
-      [0, 12, 24, rows.length - 1].forEach(function (i) { s += '<text x="' + X(i) + '" y="' + (H - 6) + '" text-anchor="' + (i === 0 ? 'start' : i === rows.length - 1 ? 'end' : 'middle') + '">' + ml(rows[i].month).replace(/ (\d\d)(\d\d)$/, " '$2") + '</text>'; });
-      s += '<path d="' + path('soy') + '" style="fill:none;stroke:#7fb0ec;stroke-width:2"/>';
-      s += '<path d="' + path('palm') + '" style="fill:none;stroke:#5cc591;stroke-width:3"/>';
-      s += '<circle cx="' + X(rows.length - 1) + '" cy="' + Y(L.palm) + '" r="5" style="fill:#5cc591"/>';
-      s += '<text x="' + (W - 12) + '" y="' + (Y(L.palm) + 18) + '" text-anchor="end" style="fill:#5cc591">palm</text><text x="' + (W - 12) + '" y="' + (Y(L.soy) - 8) + '" text-anchor="end" style="fill:#7fb0ec">soy</text>';
-      document.getElementById('fsChart').innerHTML = s;
-    }).catch(function () {});
-  })();
-
-  // Small stacked-bar preview of the calculator: deposits + interest while saving, then a drawdown.
-  (function () {
-    var svg = document.getElementById('mini'); if (!svg) return;
-    var ns = 'http://www.w3.org/2000/svg', W = 360, H = 220, L = 10, B = 196, T = 14, n = 28, save = 18;
-    var r = 0.07 / 12, bal = 10000, dep = 10000, rows = [];
-    for (var y = 1; y <= n; y++) {
-      for (var k = 0; k < 12; k++) { bal *= 1 + r; if (y <= save) { bal += 500; dep += 500; } else { bal -= 2600; } }
-      rows.push({ bal: Math.max(bal, 0), dep: dep, draw: y > save });
-    }
-    var max = Math.max.apply(null, rows.map(function (d) { return d.bal; }));
-    var slot = (W - 2 * L) / n, bw = slot * 0.7, sc = function (v) { return (v / max) * (B - T); };
-    function rect(x, y, w, h, c) { var e = document.createElementNS(ns, 'rect'); e.setAttribute('x', x); e.setAttribute('y', y); e.setAttribute('width', w); e.setAttribute('height', Math.max(h, 0)); e.setAttribute('rx', 1.5); e.setAttribute('class', c); svg.appendChild(e); }
-    var ax = document.createElementNS(ns, 'line'); ax.setAttribute('x1', L); ax.setAttribute('x2', W - L); ax.setAttribute('y1', B); ax.setAttribute('y2', B); ax.setAttribute('class', 'ax'); svg.appendChild(ax);
-    rows.forEach(function (d, i) {
-      var x = L + i * slot + (slot - bw) / 2;
-      if (d.draw) { rect(x, B - sc(d.bal), bw, sc(d.bal), 'wd'); }
-      else { var hd = sc(Math.min(d.dep, d.bal)); rect(x, B - hd, bw, hd, 'dep'); rect(x, B - sc(d.bal), bw, sc(d.bal) - hd, 'int'); }
-    });
-    var t = document.createElementNS(ns, 'text'); t.setAttribute('x', L); t.setAttribute('y', H - 4); t.textContent = 'deposits · interest · withdrawals'; svg.appendChild(t);
-  })();
-</script>
+    <h2 style="font-size:1.8em; color:#16213e; margin-top:40px; margin-bottom:15px; border-bottom:2px solid #e0e0e0; padding-bottom:8px;">❓ Frequently Asked Questions</h2>
+    <p style="font-size:1.1em; margin-bottom:15px;"><strong>Do I need a jailbroken PS5 to use Porpoise?</strong> Yes, Porpoise is designed for jailbroken PS5 consoles with homebrew support enabled. It will not run on a standard, unmodified PS5.</p>
+    <p style="font-size:1.1em; margin-bottom:15px;"><strong>Can I use Porpoise on Windows?</strong> You use Windows only to download and prepare the files. The emulator itself runs on your PS5. This guide walks you through the Windows part step by step.</p>
+    <p style="font-size:1.1em; margin-bottom:15px;"><strong>Where do I get game files?</strong> Porpoise does not include games. You need to use your own legally owned game discs or files. The emulator supports common Dolphin formats such as ISO and RVZ.</p>
+    <p style="font-size:1.1em; margin-bottom:15px;"><strong>Is Porpoise free?</strong> Yes, Porpoise is free to download from the official releases page. Always use the link in this guide to get the latest version safely.</p>
+  </div>
 </body>
 </html>
